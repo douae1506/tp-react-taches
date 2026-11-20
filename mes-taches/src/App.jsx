@@ -70,7 +70,7 @@ function App() {
     }
   }, [])
 
-  // 2. Sauvegarder les tâches dans localStorage
+  // 2. Bonus 1 : sauvegarder les tâches dans localStorage
   useEffect(() => {
     if (!chargement && !erreur) {
       localStorage.setItem('mes-taches', JSON.stringify(taches))
@@ -125,7 +125,18 @@ function App() {
     )
   }
 
-  // 8. Filtrer les tâches
+  // 8. Bonus 3 : modifier le titre d'une tâche
+  function modifierTache(id, nouveauTitre) {
+    setTaches((anciennesTaches) =>
+      anciennesTaches.map((tache) =>
+        tache.id === id
+          ? { ...tache, titre: nouveauTitre }
+          : tache
+      )
+    )
+  }
+
+  // 9. Filtrer les tâches
   const tachesVisibles = taches.filter((tache) => {
     if (filtre === 'actives') return !tache.terminee
     if (filtre === 'terminees') return tache.terminee
@@ -160,6 +171,7 @@ function App() {
                 taches={tachesVisibles}
                 onBasculer={basculerTache}
                 onSupprimer={supprimerTache}
+                onModifier={modifierTache}
               />
 
               <Statistiques taches={taches} />

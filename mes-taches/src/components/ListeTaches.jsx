@@ -1,6 +1,7 @@
+
 import Tache from './Tache'
 
-function ListeTaches({ taches, onBasculer, onSupprimer }) {
+function ListeTaches({ taches, onBasculer, onSupprimer, onModifier }) {
   if (taches.length === 0) {
     return <p>Aucune tâche pour le moment.</p>
   }
@@ -15,6 +16,7 @@ function ListeTaches({ taches, onBasculer, onSupprimer }) {
           terminee={tache.terminee}
           onBasculer={onBasculer}
           onSupprimer={onSupprimer}
+          onModifier={onModifier}
         />
       ))}
     </ul>
