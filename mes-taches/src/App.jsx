@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 
 import Entete from './components/Entete'
 import ListeTaches from './components/ListeTaches'
@@ -7,17 +7,55 @@ import Carte from './components/Carte'
 import FormulaireAjout from './components/FormulaireAjout'
 import Filtres from './components/Filtres'
 import Statistiques from './components/Statistiques'
-
-const TACHES_INITIALES = [
-  { id: 1, titre: 'Installer Node.js et Vite', terminee: true },
-  { id: 2, titre: 'Comprendre les composants', terminee: true },
-  { id: 3, titre: 'Passer des données avec les props', terminee: false },
-  { id: 4, titre: 'Gérer l’état avec useState', terminee: false },
-]
+import Horloge from './components/Horloge'
 
 function App() {
-  const [taches, setTaches] = useState(TACHES_INITIALES)
+  const [taches, setTaches] = useState([])
   const [filtre, setFiltre] = useState('toutes')
+  const [chargement, setChargement] = useState(true)
+  const [erreur, setErreur] = useState(null)
+
+  // Chargement des tâches depuis le fichier JSON
+  useEffect(() => {
+    let actif = true
+
+    fetch('/taches.json')
+      .then((reponse) => {
+        if (!reponse.ok) {
+          throw new Error('Erreur lors du chargement des tâches')
+        }
+
+        return reponse.json()
+      })
+      .then((donnees) => {
+        if (actif) {
+          setTaches(donnees)
+        }
+      })
+      .catch((err) => {
+        if (actif) {
+          setErreur(err.message)
+        }
+      })
+      .finally(() => {
+        if (actif) {
+          setChargement(false)
+        }
+      })
+
+    return () => {
+      actif = false
+    }
+  }, [])
+
+  // Mise à jour du titre de l'onglet
+  const restantes = taches.filter(
+    (tache) => !tache.terminee
+  ).length
+
+  useEffect(() => {
+    document.title = `(${restantes}) Mes tâches`
+  }, [restantes])
 
   function basculerTache(id) {
     setTaches((anciennesTaches) =>
@@ -42,7 +80,10 @@ function App() {
       terminee: false,
     }
 
-    setTaches((anciennesTaches) => [...anciennesTaches, nouvelleTache])
+    setTaches((anciennesTaches) => [
+      ...anciennesTaches,
+      nouvelleTache,
+    ])
   }
 
   const tachesVisibles = taches.filter((tache) => {
@@ -60,17 +101,30 @@ function App() {
 
       <main>
         <Carte titre="Ma liste">
-          <FormulaireAjout onAjouter={ajouterTache} />
+          <Horloge />
 
-          <Filtres filtre={filtre} setFiltre={setFiltre} />
+          {chargement ? (
+            <p>Chargement des tâches...</p>
+          ) : erreur ? (
+            <p>Erreur : {erreur}</p>
+          ) : (
+            <>
+              <FormulaireAjout onAjouter={ajouterTache} />
 
-          <ListeTaches
-            taches={tachesVisibles}
-            onBasculer={basculerTache}
-            onSupprimer={supprimerTache}
-          />
+              <Filtres
+                filtre={filtre}
+                setFiltre={setFiltre}
+              />
 
-          <Statistiques taches={taches} />
+              <ListeTaches
+                taches={tachesVisibles}
+                onBasculer={basculerTache}
+                onSupprimer={supprimerTache}
+              />
+
+              <Statistiques taches={taches} />
+            </>
+          )}
         </Carte>
       </main>
 
