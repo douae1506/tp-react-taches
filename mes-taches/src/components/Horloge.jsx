@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react'
 
 function Horloge() {
@@ -8,7 +9,9 @@ function Horloge() {
       setHeure(new Date())
     }, 1000)
 
+    // Nettoyage lorsque le composant est démonté
     return () => {
+      console.log('Nettoyage de l horloge')
       clearInterval(intervalle)
     }
   }, [])

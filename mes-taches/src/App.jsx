@@ -16,7 +16,8 @@ function App() {
   const [chargement, setChargement] = useState(true)
   const [erreur, setErreur] = useState(null)
 
-  // 1. Charger les tâches depuis localStorage ou JSON
+  const [afficherHorloge, setAfficherHorloge] = useState(true)
+
   useEffect(() => {
     let actif = true
 
@@ -70,14 +71,12 @@ function App() {
     }
   }, [])
 
-  // 2. Bonus 1 : sauvegarder les tâches dans localStorage
   useEffect(() => {
     if (!chargement && !erreur) {
       localStorage.setItem('mes-taches', JSON.stringify(taches))
     }
   }, [taches, chargement, erreur])
 
-  // 3. Mettre à jour le titre de l'onglet
   const restantes = taches.filter(
     (tache) => !tache.terminee
   ).length
@@ -86,7 +85,6 @@ function App() {
     document.title = `(${restantes}) Mes tâches`
   }, [restantes])
 
-  // 4. Basculer l'état d'une tâche
   function basculerTache(id) {
     setTaches((anciennesTaches) =>
       anciennesTaches.map((tache) =>
@@ -97,14 +95,12 @@ function App() {
     )
   }
 
-  // 5. Supprimer une tâche
   function supprimerTache(id) {
     setTaches((anciennesTaches) =>
       anciennesTaches.filter((tache) => tache.id !== id)
     )
   }
 
-  // 6. Ajouter une tâche
   function ajouterTache(titre) {
     const nouvelleTache = {
       id: Date.now(),
@@ -118,14 +114,12 @@ function App() {
     ])
   }
 
-  // 7. Bonus 2 : supprimer toutes les tâches terminées
   function supprimerTachesTerminees() {
     setTaches((anciennesTaches) =>
       anciennesTaches.filter((tache) => !tache.terminee)
     )
   }
 
-  // 8. Bonus 3 : modifier le titre d'une tâche
   function modifierTache(id, nouveauTitre) {
     setTaches((anciennesTaches) =>
       anciennesTaches.map((tache) =>
@@ -136,7 +130,6 @@ function App() {
     )
   }
 
-  // 9. Filtrer les tâches
   const tachesVisibles = taches.filter((tache) => {
     if (filtre === 'actives') return !tache.terminee
     if (filtre === 'terminees') return tache.terminee
@@ -152,7 +145,17 @@ function App() {
 
       <main>
         <Carte titre="Ma liste">
-          <Horloge />
+
+          {}
+          <button
+            onClick={() => setAfficherHorloge(!afficherHorloge)}
+          >
+            {afficherHorloge
+              ? 'Masquer l horloge'
+              : 'Afficher l horloge'}
+          </button>
+
+          {afficherHorloge && <Horloge />}
 
           {chargement ? (
             <p>Chargement des tâches...</p>
@@ -176,6 +179,7 @@ function App() {
 
               <Statistiques taches={taches} />
 
+              {/* Bonus 2 : supprimer les tâches terminées */}
               <button
                 onClick={supprimerTachesTerminees}
                 disabled={!taches.some((tache) => tache.terminee)}
