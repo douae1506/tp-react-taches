@@ -4,7 +4,9 @@ import Entete from './components/Entete'
 import ListeTaches from './components/ListeTaches'
 import Pied from './components/Pied'
 import Carte from './components/Carte'
-import Compteur from './components/Compteur'
+import FormulaireAjout from './components/FormulaireAjout'
+import Filtres from './components/Filtres'
+import Statistiques from './components/Statistiques'
 
 const TACHES_INITIALES = [
   { id: 1, titre: 'Installer Node.js et Vite', terminee: true },
@@ -15,10 +17,11 @@ const TACHES_INITIALES = [
 
 function App() {
   const [taches, setTaches] = useState(TACHES_INITIALES)
+  const [filtre, setFiltre] = useState('toutes')
 
   function basculerTache(id) {
-    setTaches(
-      taches.map((tache) =>
+    setTaches((anciennesTaches) =>
+      anciennesTaches.map((tache) =>
         tache.id === id
           ? { ...tache, terminee: !tache.terminee }
           : tache
@@ -27,8 +30,26 @@ function App() {
   }
 
   function supprimerTache(id) {
-    setTaches(taches.filter((tache) => tache.id !== id))
+    setTaches((anciennesTaches) =>
+      anciennesTaches.filter((tache) => tache.id !== id)
+    )
   }
+
+  function ajouterTache(titre) {
+    const nouvelleTache = {
+      id: Date.now(),
+      titre: titre,
+      terminee: false,
+    }
+
+    setTaches((anciennesTaches) => [...anciennesTaches, nouvelleTache])
+  }
+
+  const tachesVisibles = taches.filter((tache) => {
+    if (filtre === 'actives') return !tache.terminee
+    if (filtre === 'terminees') return tache.terminee
+    return true
+  })
 
   return (
     <>
@@ -39,15 +60,17 @@ function App() {
 
       <main>
         <Carte titre="Ma liste">
+          <FormulaireAjout onAjouter={ajouterTache} />
+
+          <Filtres filtre={filtre} setFiltre={setFiltre} />
+
           <ListeTaches
-            taches={taches}
+            taches={tachesVisibles}
             onBasculer={basculerTache}
             onSupprimer={supprimerTache}
           />
-        </Carte>
 
-        <Carte titre="Compteur">
-          <Compteur />
+          <Statistiques taches={taches} />
         </Carte>
       </main>
 
