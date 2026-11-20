@@ -77,7 +77,7 @@ function App() {
     }
   }, [taches, chargement, erreur])
 
-  // 3. Mise à jour du titre de l'onglet
+  // 3. Mettre à jour le titre de l'onglet
   const restantes = taches.filter(
     (tache) => !tache.terminee
   ).length
@@ -118,7 +118,14 @@ function App() {
     ])
   }
 
-  // 7. Filtrer les tâches
+  // 7. Bonus 2 : supprimer toutes les tâches terminées
+  function supprimerTachesTerminees() {
+    setTaches((anciennesTaches) =>
+      anciennesTaches.filter((tache) => !tache.terminee)
+    )
+  }
+
+  // 8. Filtrer les tâches
   const tachesVisibles = taches.filter((tache) => {
     if (filtre === 'actives') return !tache.terminee
     if (filtre === 'terminees') return tache.terminee
@@ -156,6 +163,13 @@ function App() {
               />
 
               <Statistiques taches={taches} />
+
+              <button
+                onClick={supprimerTachesTerminees}
+                disabled={!taches.some((tache) => tache.terminee)}
+              >
+                Supprimer les tâches terminées
+              </button>
             </>
           )}
         </Carte>
