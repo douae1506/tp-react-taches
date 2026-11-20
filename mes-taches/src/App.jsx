@@ -1,4 +1,5 @@
-﻿import { useEffect, useState } from 'react'
+﻿
+import { useEffect, useState } from 'react'
 
 import Entete from './components/Entete'
 import ListeTaches from './components/ListeTaches'
@@ -15,9 +16,30 @@ function App() {
   const [chargement, setChargement] = useState(true)
   const [erreur, setErreur] = useState(null)
 
-  // Chargement des tâches depuis le fichier JSON
+  // 1. Charger les tâches depuis localStorage ou JSON
   useEffect(() => {
     let actif = true
+
+    const sauvegarde = localStorage.getItem('mes-taches')
+
+    if (sauvegarde) {
+      try {
+        const donnees = JSON.parse(sauvegarde)
+
+        if (!Array.isArray(donnees)) {
+          throw new Error('Format de sauvegarde invalide')
+        }
+
+        setTaches(donnees)
+        setChargement(false)
+
+        return () => {
+          actif = false
+        }
+      } catch {
+        localStorage.removeItem('mes-taches')
+      }
+    }
 
     fetch('/taches.json')
       .then((reponse) => {
@@ -48,7 +70,14 @@ function App() {
     }
   }, [])
 
-  // Mise à jour du titre de l'onglet
+  // 2. Sauvegarder les tâches dans localStorage
+  useEffect(() => {
+    if (!chargement && !erreur) {
+      localStorage.setItem('mes-taches', JSON.stringify(taches))
+    }
+  }, [taches, chargement, erreur])
+
+  // 3. Mise à jour du titre de l'onglet
   const restantes = taches.filter(
     (tache) => !tache.terminee
   ).length
@@ -57,6 +86,7 @@ function App() {
     document.title = `(${restantes}) Mes tâches`
   }, [restantes])
 
+  // 4. Basculer l'état d'une tâche
   function basculerTache(id) {
     setTaches((anciennesTaches) =>
       anciennesTaches.map((tache) =>
@@ -67,12 +97,14 @@ function App() {
     )
   }
 
+  // 5. Supprimer une tâche
   function supprimerTache(id) {
     setTaches((anciennesTaches) =>
       anciennesTaches.filter((tache) => tache.id !== id)
     )
   }
 
+  // 6. Ajouter une tâche
   function ajouterTache(titre) {
     const nouvelleTache = {
       id: Date.now(),
@@ -86,6 +118,7 @@ function App() {
     ])
   }
 
+  // 7. Filtrer les tâches
   const tachesVisibles = taches.filter((tache) => {
     if (filtre === 'actives') return !tache.terminee
     if (filtre === 'terminees') return tache.terminee
