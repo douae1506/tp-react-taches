@@ -1,16 +1,18 @@
-function ListeTaches() {
-  const taches = [
-    { id: 1, titre: 'Installer Node.js et Vite', terminee: true },
-    { id: 2, titre: 'Comprendre les composants React', terminee: false },
-    { id: 3, titre: 'Créer ma première application', terminee: false },
-  ]
+import Tache from './Tache'
+
+function ListeTaches({ taches }) {
+  if (taches.length === 0) {
+    return <p>Aucune tâche pour le moment.</p>
+  }
 
   return (
     <ul>
       {taches.map((tache) => (
-        <li key={tache.id}>
-          {tache.terminee ? '✅' : '⬜'} {tache.titre}
-        </li>
+        <Tache
+          key={tache.id}
+          titre={tache.titre}
+          terminee={tache.terminee}
+        />
       ))}
     </ul>
   )
